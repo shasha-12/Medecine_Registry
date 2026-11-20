@@ -326,6 +326,10 @@ The contract was deployed to the **Ethereum Sepolia testnet** using Remix with M
 
 ![Figure 10: Contract page on Sepolia Etherscan](screenshots/03-etherscan.png)
 
+**Bonus: demo page.** To make the project easy to demonstrate, a small web page (`frontend/index.html`) lets a manufacturer register a batch, anyone check it, and a regulator recall it, all against the deployed Sepolia contract. Checking is a read-only call, so it is free and needs no wallet. Registering and recalling use MetaMask, and the contract's role checks still apply: a wallet that is not a regulator is refused when it tries to recall.
+
+![Figure 11: Demo page showing a recalled batch and the recall confirmation](screenshots/demo-page.png)
+
 # 6. Validation and Testing
 
 A Hardhat test suite of **22 test cases** was written in JavaScript (Mocha and Chai). Time-dependent behaviour such as expiry is tested by advancing the local blockchain clock. All 22 tests pass.
