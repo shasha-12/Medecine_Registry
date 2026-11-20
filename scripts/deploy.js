@@ -1,4 +1,4 @@
-// Deploys MedicineRegistry. The deploying wallet becomes the first regulator.
+// Deploys MedicineRegistry. Whoever deploys becomes the first regulator.
 const fs = require("fs");
 const path = require("path");
 const { ethers, network } = require("hardhat");

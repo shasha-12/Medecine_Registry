@@ -2,7 +2,7 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const { time } = require("@nomicfoundation/hardhat-network-helpers");
 
-// Status enum values returned by verifyBatch
+// numbers verifyBatch returns for each status
 const Status = { NotFound: 0n, Genuine: 1n, Expired: 2n, Recalled: 3n };
 const DAY = 24 * 60 * 60;
 

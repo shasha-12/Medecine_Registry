@@ -12,7 +12,7 @@ module.exports = {
   networks: {
     hardhat: {},
     localhost: { url: "http://127.0.0.1:8545" },
-    // Only enabled when the .env file provides credentials.
+    // only used when .env has the keys
     ...(SEPOLIA_RPC_URL && PRIVATE_KEY
       ? { sepolia: { url: SEPOLIA_RPC_URL, accounts: [PRIVATE_KEY] } }
       : {}),

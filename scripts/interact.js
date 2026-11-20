@@ -1,5 +1,5 @@
-// End-to-end demo against a deployed registry (the signer must be the regulator).
-// For simplicity the regulator also acts as the manufacturer in the demo.
+// Demo against a deployed contract. The signer has to be the regulator.
+// To keep it simple the regulator also plays the manufacturer here.
 const fs = require("fs");
 const path = require("path");
 const { ethers, network } = require("hardhat");
