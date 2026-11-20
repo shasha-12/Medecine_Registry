@@ -126,17 +126,21 @@
 </header>
 
 <main>
+  <section class="card">
+    <div class="wallet">
+      <span class="who" id="walletInfo">Wallet not connected</span>
+      <button class="primary" id="connect" type="button">Connect wallet</button>
+    </div>
+    <p class="sub" style="margin:8px 0 0">Registering and recalling write to the blockchain, so they need a wallet on the Sepolia test network. Checking does not.</p>
+    <div class="msg" id="walletMsg"></div>
+  </section>
+
   <!-- STEP 1: register -->
   <section class="card">
     <div class="step"><span class="num">1</span><h2>Register a batch</h2></div>
     <p class="sub">For approved manufacturers. This writes the batch to the blockchain and needs a wallet.</p>
 
-    <div class="wallet">
-      <span class="who" id="walletInfo">Wallet not connected</span>
-      <button class="primary" id="connect" type="button">Connect wallet</button>
-    </div>
-
-    <label for="regId">Batch ID (printed on the pack)</label>
+    <label for="regId" style="margin-top:0">Batch ID (printed on the pack)</label>
     <input type="text" id="regId" placeholder="e.g. PARA-2026-002" autocomplete="off" spellcheck="false">
 
     <label for="regDrug">Medicine name and strength</label>
@@ -172,6 +176,23 @@
       <dl id="details"></dl>
     </div>
   </section>
+
+  <!-- STEP 3: recall -->
+  <section class="card">
+    <div class="step"><span class="num">3</span><h2>Recall a batch</h2></div>
+    <p class="sub">For regulators only. A recalled batch is marked unsafe for everyone. This cannot be undone.</p>
+
+    <label for="recId" style="margin-top:0">Batch ID to recall</label>
+    <input type="text" id="recId" placeholder="e.g. PARA-2026-002" autocomplete="off" spellcheck="false">
+
+    <label for="recReason">Reason</label>
+    <input type="text" id="recReason" placeholder="e.g. Contamination found" autocomplete="off">
+
+    <div style="margin-top:16px">
+      <button class="primary" id="recall" type="button">Recall batch</button>
+    </div>
+    <div class="msg" id="recMsg"></div>
+  </section>
 </main>
 
 <script>
@@ -188,6 +209,9 @@ const __$G=typeof globalThis!=="undefined"?globalThis:typeof window!=="undefined
   const ABI = [
     "function verifyBatch(string batchId) view returns (uint8 status, tuple(address manufacturer, string drugName, uint64 expiryDate, uint64 registeredAt, bool recalled, string recallReason) batch, string manufacturerLabel)",
     "function registerBatch(string batchId, string drugName, uint64 expiryDate)",
+    "function recallBatch(string batchId, string reason)",
+    "error BatchDoesNotExist(string batchId)",
+    "error AlreadyRecalled(string batchId)",
     "error AccessControlUnauthorizedAccount(address account, bytes32 neededRole)",
     "error BatchAlreadyExists(string batchId)",
     "error ExpiryNotInFuture(uint64 expiryDate)",
@@ -275,7 +299,7 @@ const __$G=typeof globalThis!=="undefined"?globalThis:typeof window!=="undefined
 
   async function connect() {
     if (!window.ethereum) {
-      message($("regMsg"), "bad", "No wallet found. Open this page in a browser with MetaMask installed. If you opened the file directly, run <span class='mono'>python3 -m http.server 8000</span> in the frontend folder and visit <span class='mono'>http://localhost:8000</span>.");
+      message($("walletMsg"), "bad", "No wallet found. Open this page in a browser with MetaMask installed. If you opened the file directly, run <span class='mono'>python3 -m http.server 8000</span> in the frontend folder and visit <span class='mono'>http://localhost:8000</span>.");
       return false;
     }
     try {
@@ -285,26 +309,33 @@ const __$G=typeof globalThis!=="undefined"?globalThis:typeof window!=="undefined
       try {
         await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: SEPOLIA_HEX }] });
       } catch (e) {
-        message($("regMsg"), "bad", "Please switch your wallet to the Sepolia test network.");
+        message($("walletMsg"), "bad", "Please switch your wallet to the Sepolia test network.");
         return false;
       }
       const provider = new ethers.BrowserProvider(window.ethereum);
       signer = await provider.getSigner();
       $("walletInfo").textContent = "Connected: " + short(await signer.getAddress());
       $("connect").textContent = "Switch account";
+      $("walletMsg").className = "msg";
       return true;
     } catch (err) {
-      message($("regMsg"), "bad", "Wallet connection was cancelled.");
+      message($("walletMsg"), "bad", "Wallet connection was cancelled.");
       return false;
     }
   }
 
-  function explain(err) {
+  function explain(err, action) {
     const name = err.revert && err.revert.name;
-    if (name === "AccessControlUnauthorizedAccount") return "This wallet is not an approved manufacturer. A regulator must approve it first.";
+    if (name === "AccessControlUnauthorizedAccount") {
+      return action === "recall"
+        ? "This wallet is not a regulator, so it cannot recall batches."
+        : "This wallet is not an approved manufacturer. A regulator must approve it first.";
+    }
     if (name === "BatchAlreadyExists") return "This batch ID is already registered. Use a different ID.";
     if (name === "ExpiryNotInFuture") return "The expiry date must be in the future.";
-    if (name === "EmptyInput") return "Batch ID and medicine name cannot be empty.";
+    if (name === "EmptyInput") return action === "recall" ? "Batch ID and reason cannot be empty." : "Batch ID and medicine name cannot be empty.";
+    if (name === "BatchDoesNotExist") return "This batch ID is not in the registry, so it cannot be recalled.";
+    if (name === "AlreadyRecalled") return "This batch has already been recalled.";
     if (err.code === "ACTION_REJECTED" || err.code === 4001) return "You rejected the transaction in your wallet.";
     return err.shortMessage || err.message || "The transaction failed.";
   }
@@ -343,9 +374,42 @@ const __$G=typeof globalThis!=="undefined"?globalThis:typeof window!=="undefined
         $("batch").scrollIntoView({ behavior: "smooth", block: "center" });
       });
     } catch (err) {
-      message($("regMsg"), "bad", esc(explain(err)));
+      message($("regMsg"), "bad", esc(explain(err, "register")));
     } finally {
       $("register").disabled = false;
+    }
+  }
+
+  async function recall() {
+    const id = $("recId").value.trim();
+    const reason = $("recReason").value.trim();
+    if (!id || !reason) {
+      message($("recMsg"), "bad", "Fill in the batch ID and the reason for the recall.");
+      return;
+    }
+    if (!signer && !(await connect())) return;
+
+    $("recall").disabled = true;
+    try {
+      const contract = new ethers.Contract(CONTRACT, ABI, signer);
+      message($("recMsg"), "info", "Confirm the transaction in your wallet...");
+      await contract.recallBatch.staticCall(id, reason);
+      const tx = await contract.recallBatch(id, reason);
+      message($("recMsg"), "info", "Recording the recall on the blockchain. Waiting for confirmation...");
+      await tx.wait();
+      message($("recMsg"), "ok",
+        "Batch <strong>" + esc(id) + "</strong> has been recalled. " +
+        '<a href="https://sepolia.etherscan.io/tx/' + tx.hash + '" target="_blank" rel="noopener">View transaction</a>. ' +
+        '<button class="link" id="checkRecalled" type="button">Check it now</button>');
+      $("checkRecalled").addEventListener("click", () => {
+        $("batch").value = id;
+        check();
+        $("batch").scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    } catch (err) {
+      message($("recMsg"), "bad", esc(explain(err, "recall")));
+    } finally {
+      $("recall").disabled = false;
     }
   }
 
@@ -366,6 +430,7 @@ const __$G=typeof globalThis!=="undefined"?globalThis:typeof window!=="undefined
 
   $("connect").addEventListener("click", connect);
   $("register").addEventListener("click", register);
+  $("recall").addEventListener("click", recall);
 
   const preset = new URLSearchParams(location.search).get("batch");
   if (preset) { $("batch").value = preset; check(); }
