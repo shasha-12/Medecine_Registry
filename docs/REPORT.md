@@ -1,6 +1,6 @@
 ---
 title: "Developing a Blockchain-Based Solution for Counterfeit Medicine in Healthcare"
-subtitle: "MedicineRegistry — Summative Assessment, Blockchain and Applications"
+subtitle: "MedicineRegistry, Summative Assessment, Blockchain and Applications"
 author: "Anitha Uwimpuhwe"
 date: "21 November 2026"
 ---

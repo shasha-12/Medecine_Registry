@@ -1,4 +1,4 @@
-# MedicineRegistry — blockchain medicine verification
+# MedicineRegistry: blockchain medicine verification
 
 Healthcare solution on Ethereum (Sepolia). Approved manufacturers register medicine batches; regulators can recall them; anyone can verify a batch for free.
 

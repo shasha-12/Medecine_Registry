@@ -1,4 +1,4 @@
-# Deployment Guide — MedicineRegistry on Ethereum Sepolia
+# Deployment Guide: MedicineRegistry on Ethereum Sepolia
 
 ## Prerequisites
 - A browser with the MetaMask extension.
@@ -8,7 +8,7 @@
 - Free Sepolia test ETH in both accounts (from a Sepolia faucet; about 0.05 ETH each is enough).
 - For local testing only: Node.js 24, then `npm install` in the project folder.
 
-## Part 1 — Run the tests locally (optional but recommended)
+## Part 1: Run the tests locally (optional but recommended)
 ```bash
 cd medicine-verifier
 npm install
@@ -16,7 +16,7 @@ npx hardhat compile
 npx hardhat test        # expect: 22 passing
 ```
 
-## Part 2 — Deploy with Remix
+## Part 2: Deploy with Remix
 1. Open https://remix.ethereum.org and create a file `MedicineRegistry.sol`.
 2. Paste the contents of `remix/MedicineRegistry.sol` (it imports OpenZeppelin 5.0.2 from GitHub).
 3. **Solidity Compiler** tab: compiler `0.8.24` or higher (tested with 0.8.34), default EVM version, optimizer off, then **Compile**.
@@ -27,7 +27,7 @@ npx hardhat test        # expect: 22 passing
    - Click **Deploy** and confirm in MetaMask.
 5. Copy the deployed contract address and open it on https://sepolia.etherscan.io.
 
-## Part 3 — Interact
+## Part 3: Interact
 Use the deployed contract's buttons in Remix. Switch the MetaMask account between calls.
 
 | # | Account | Function and inputs | Expected |

@@ -1,4 +1,4 @@
-# Test Cases — MedicineRegistry
+# Test Cases: MedicineRegistry
 
 Run with `npx hardhat test` (Hardhat local network, Solidity 0.8.24). Full output: `docs/test-output.txt`.
 **Result: 22 passing, 0 failing.**
