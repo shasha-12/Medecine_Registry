@@ -22,5 +22,16 @@ npx hardhat test     # 22 passing
 
 Sepolia contract address: `0xe16Af03E9a14705198afBE17db4DD126B86B627c`
 
-## Bonus: verification page
-`frontend/index.html` is a small read-only page for the demo. Open it in a browser (double-click the file), type a batch ID and it calls `verifyBatch` on the Sepolia contract. No wallet or install needed; the ethers library is embedded in the file. It also accepts a link such as `index.html?batch=PARA-2026-001`, which is how a QR code on a pack could open it.
+## Bonus: demo page
+`frontend/index.html` is a small page that shows the whole idea in two steps.
+1. **Register a batch** (approved manufacturer, needs MetaMask on Sepolia).
+2. **Check a batch** (anyone, free, no wallet). The result is Genuine, Expired, Recalled or Not found.
+
+Checking works by double-clicking the file. Registering needs MetaMask, which does not run on local files, so serve the folder first:
+
+```
+cd frontend
+python3 -m http.server 8000
+```
+
+then open http://localhost:8000. A link such as `?batch=PARA-2026-001` checks a batch straight away, which is how a QR code on a pack could open it.
