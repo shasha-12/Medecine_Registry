@@ -57,7 +57,7 @@ Manufacturer approved → batch registered → (Genuine) → either expires over
 
 # 4. Smart Contract Development
 
-**Tools:** Solidity 0.8.24 (EVM Cancun), OpenZeppelin Contracts 5.x, Hardhat for compile and tests, Remix and MetaMask for Sepolia deployment.
+**Tools:** Solidity ^0.8.24 (compiled with 0.8.34 in Remix), OpenZeppelin Contracts 5.x, Hardhat for compile and tests, Remix and MetaMask for Sepolia deployment.
 
 ## 4.1 Security measures
 - **Access control:** every write function is protected by `onlyRole`; regulators administer the manufacturer role.
@@ -206,6 +206,29 @@ contract MedicineRegistry is AccessControl {
 }
 ```
 
+## 4.3 How the main functions work
+
+| Function | Who can call it | What it does | Checks it makes |
+|---|---|---|---|
+| `constructor(firstRegulator)` | Runs once at deployment | Gives the first regulator the regulator and admin roles, and makes regulators the managers of both roles | Rejects the zero address |
+| `approveManufacturer(address, name)` | Regulator | Saves the manufacturer's public name and grants the manufacturer role | Zero address, empty name, already approved |
+| `removeManufacturer(address)` | Regulator | Revokes the manufacturer role. Old batches stay on record | Must currently be a manufacturer |
+| `registerBatch(id, drug, expiry)` | Approved manufacturer | Stores the batch with the manufacturer's address and the current time, and emits `BatchRegistered` | Empty values, expiry in the past, duplicate ID |
+| `recallBatch(id, reason)` | Regulator | Marks the batch as recalled, stores the reason, and emits `BatchRecalled` | Empty reason, unknown batch, already recalled |
+| `verifyBatch(id)` | Anyone (read-only, free) | Returns the status and the stored record | None. Never changes data |
+
+`verifyBatch` decides the status in a fixed order: not registered gives NotFound, then recalled gives Recalled, then a date that has passed gives Expired, otherwise Genuine. Checking recall before expiry is what makes a recall always win.
+
+```solidity
+if (batch.recalled) {
+    status = Status.Recalled;
+} else if (block.timestamp >= batch.expiryDate) {
+    status = Status.Expired;
+} else {
+    status = Status.Genuine;
+}
+```
+
 # 5. Implementation: Deployment on the Ethereum Testnet
 
 The contract was deployed to the **Ethereum Sepolia testnet** using Remix with MetaMask. The step-by-step procedure is in the separate *Deployment Guide* (`docs/DEPLOYMENT_GUIDE.md`) and is summarised here.
@@ -293,6 +316,30 @@ A Hardhat test suite of **22 test cases** was written in JavaScript (Mocha and C
 
   22 passing (604ms)
 ```
+
+An example test, showing how a forbidden action is checked:
+
+```javascript
+it("T4 non-regulator cannot approve a manufacturer", async function () {
+  await expect(
+    registry.connect(stranger).approveManufacturer(stranger.address, "Fake Pharma")
+  ).to.be.revertedWithCustomError(registry, "AccessControlUnauthorizedAccount");
+});
+```
+
+## 6.1 Sepolia interaction tests
+
+After deployment, seven tests were run by hand on the live Sepolia contract through Remix. The screenshots are Figures 3 to 9.
+
+| Step | Account | Call | Expected | Actual |
+|---|---|---|---|---|
+| S1 | Regulator | `approveManufacturer(manufacturer, "PharmaCo Ltd")` | Success | Pass, mined in block 12175015 |
+| S2 | Manufacturer | `registerBatch("PARA-2026-001", "Paracetamol 500mg", 1830000000)` | Success | Pass, mined in block 12175099 |
+| S3 | Anyone | `verifyBatch("PARA-2026-001")` | status 1 (Genuine) | Pass, status 1, manufacturer label PharmaCo Ltd |
+| S4 | Anyone | `verifyBatch("FAKE-999")` | status 0 (NotFound) | Pass, status 0 |
+| S5 | Regulator | `recallBatch("PARA-2026-001", "Contamination found")` | Success | Pass, mined in block 12175163 |
+| S6 | Anyone | `verifyBatch("PARA-2026-001")` | status 3 (Recalled) | Pass, status 3 with the reason |
+| S7 | Manufacturer | `recallBatch(...)` | Reverts | Pass, transaction reverted (block 12175145) |
 
 The full table of expected versus actual results is in *Test Cases* (`docs/TEST_CASES.md`). The tests cover: deployment, manufacturer approval and removal, batch registration with all rejection paths, verification (genuine, unknown, expired, no-role caller), recalls (including priority over expiry), and regulator management. Seven additional manual tests (S1 to S7) were run on Sepolia and are recorded in the same table.
 
