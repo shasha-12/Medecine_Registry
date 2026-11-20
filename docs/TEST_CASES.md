@@ -32,10 +32,10 @@ Run with `npx hardhat test` (Hardhat local network, Solidity 0.8.24). Full outpu
 
 | Step | Account | Call | Expected | Actual |
 |------|---------|------|----------|--------|
-| S1 | Regulator | `approveManufacturer(manufacturer, "PharmaCo Ltd")` | Success | _fill in from screenshot_ |
-| S2 | Manufacturer | `registerBatch("PARA-2026-001", "Paracetamol 500mg", 1830000000)` | Success | _fill in_ |
-| S3 | Anyone | `verifyBatch("PARA-2026-001")` | status 1 (Genuine) | _fill in_ |
-| S4 | Anyone | `verifyBatch("FAKE-999")` | status 0 (NotFound) | _fill in_ |
-| S5 | Regulator | `recallBatch("PARA-2026-001", "Contamination found")` | Success | _fill in_ |
-| S6 | Anyone | `verifyBatch("PARA-2026-001")` | status 3 (Recalled) | _fill in_ |
-| S7 | Manufacturer | `recallBatch(...)` | Reverts (access control) | _fill in_ |
+| S1 | Regulator | `approveManufacturer(manufacturer, "PharmaCo Ltd")` | Success | Pass. Mined in block 12175015, tx `0x5a7ceecbeff5a966432f692f0671520d717dc4ff2f6bca95fbffba05c176e4a8` ([S1](screenshots/S1.png)) |
+| S2 | Manufacturer | `registerBatch("PARA-2026-001", "Paracetamol 500mg", 1830000000)` | Success | Pass. Mined in block 12175099, `BatchRegistered` event emitted ([S2](screenshots/S2.png)) |
+| S3 | Anyone | `verifyBatch("PARA-2026-001")` | status 1 (Genuine) | Pass. status 1 (Genuine), manufacturer label "PharmaCo Ltd" ([S3](screenshots/S3.png)) |
+| S4 | Anyone | `verifyBatch("FAKE-999")` | status 0 (NotFound) | Pass. status 0 (NotFound), empty record ([S4](screenshots/S4.png)) |
+| S5 | Regulator | `recallBatch("PARA-2026-001", "Contamination found")` | Success | Pass. Mined in block 12175163, `BatchRecalled` event emitted ([S5](screenshots/S5.png)) |
+| S6 | Anyone | `verifyBatch("PARA-2026-001")` | status 3 (Recalled) | Pass. status 3 (Recalled), reason "Contamination found" ([S6](screenshots/S6.png)) |
+| S7 | Manufacturer | `recallBatch(...)` | Reverts (access control) | Pass. Transaction reverted (block 12175145), batch not recalled ([S7](screenshots/S7.png)) |

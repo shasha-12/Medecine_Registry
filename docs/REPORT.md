@@ -1,7 +1,7 @@
 ---
 title: "Developing a Blockchain-Based Solution for Counterfeit Medicine in Healthcare"
 subtitle: "MedicineRegistry — Summative Assessment, Blockchain and Applications"
-author: "[Your full name]"
+author: "Anitha Uwimpuhwe"
 date: "21 November 2026"
 ---
 
@@ -291,7 +291,7 @@ contract MedicineRegistry is AccessControl {
 
 The contract was deployed to the **Ethereum Sepolia testnet** using Remix with MetaMask. The step-by-step procedure is in the separate *Deployment Guide* (`docs/DEPLOYMENT_GUIDE.md`) and is summarised here.
 
-1. Compile in Remix with compiler 0.8.24, EVM Cancun, optimizer 200 runs.
+1. Compile in Remix with Solidity compiler 0.8.34 (EVM version osaka, optimizer off).
 2. Deploy with *Injected Provider – MetaMask* on Sepolia, passing the regulator's address to the constructor.
 3. Approve a manufacturer, register batches, verify, recall, and test a forbidden action.
 
@@ -300,11 +300,31 @@ The contract was deployed to the **Ethereum Sepolia testnet** using Remix with M
 | Item | Value |
 |---|---|
 | Network | Ethereum Sepolia testnet |
-| Contract address | `[PASTE CONTRACT ADDRESS]` |
-| Etherscan | `https://sepolia.etherscan.io/address/[PASTE CONTRACT ADDRESS]` |
-| Deployment transaction | `[PASTE TX HASH]` |
+| Contract address | `0xe16Af03E9a14705198afBE17db4DD126B86B627c` |
+| Etherscan | `https://sepolia.etherscan.io/address/0xe16Af03E9a14705198afBE17db4DD126B86B627c` |
+| Deployment transaction | `0x4c372286cc8902f2c3d17fa21226c76e6d73e1aafd37ba818cce52aad23c69f0` |
 
-**Screenshots** (insert): Figure 1 compile, Figure 2 deployment, Figure 3 approve manufacturer, Figure 4 register batch, Figure 5 verify Genuine, Figure 6 verify NotFound, Figure 7 recall, Figure 8 verify Recalled, Figure 9 failed unauthorised recall, Figure 10 Etherscan page.
+**Screenshots**
+
+![Figure 1: Successful compilation in Remix](screenshots/01-compile.png)
+
+![Figure 2: Contract deployed on Sepolia (Remix, Deployed Contracts)](screenshots/03-deployed.png)
+
+![Figure 3: S1, regulator approves the manufacturer](screenshots/S1.png)
+
+![Figure 4: S2, manufacturer registers a batch](screenshots/S2.png)
+
+![Figure 5: S3, verifyBatch returns Genuine (status 1)](screenshots/S3.png)
+
+![Figure 6: S4, verifyBatch returns NotFound (status 0)](screenshots/S4.png)
+
+![Figure 7: S5, regulator recalls the batch](screenshots/S5.png)
+
+![Figure 8: S6, verifyBatch returns Recalled (status 3)](screenshots/S6.png)
+
+![Figure 9: S7, unauthorised recall by the manufacturer reverts](screenshots/S7.png)
+
+![Figure 10: Contract page on Sepolia Etherscan](screenshots/03-etherscan.png)
 
 # 6. Validation and Testing
 

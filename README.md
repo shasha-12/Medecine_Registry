@@ -2,6 +2,8 @@
 
 Healthcare solution on Ethereum (Sepolia). Approved manufacturers register medicine batches; regulators can recall them; anyone can verify a batch for free.
 
+Author: Anitha Uwimpuhwe · Blockchain and Applications · Summative Assessment
+
 ## Deliverables
 | Deliverable | File |
 |---|---|
@@ -18,4 +20,4 @@ npm install
 npx hardhat test     # 22 passing
 ```
 
-Sepolia contract address: `[PASTE ADDRESS]`
+Sepolia contract address: `0xe16Af03E9a14705198afBE17db4DD126B86B627c`

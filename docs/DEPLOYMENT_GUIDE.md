@@ -19,7 +19,7 @@ npx hardhat test        # expect: 22 passing
 ## Part 2 — Deploy with Remix
 1. Open https://remix.ethereum.org and create a file `MedicineRegistry.sol`.
 2. Paste the contents of `remix/MedicineRegistry.sol` (it imports OpenZeppelin 5.0.2 from GitHub).
-3. **Solidity Compiler** tab: compiler `0.8.24`, EVM version `cancun`, optimizer on (200 runs), then **Compile**.
+3. **Solidity Compiler** tab: compiler `0.8.24` or higher (tested with 0.8.34), default EVM version, optimizer off, then **Compile**.
 4. **Deploy & Run** tab:
    - Environment: *Injected Provider – MetaMask*; select Account A on Sepolia.
    - Contract: `MedicineRegistry`.
