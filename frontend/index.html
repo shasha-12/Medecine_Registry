@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Medicine Verifier</title>
+<style>
+  :root {
+    --bg: #f4f6f8;
+    --card: #ffffff;
+    --text: #1b2733;
+    --muted: #5d6b78;
+    --line: #dde3e9;
+    --accent: #0b2a4a;
+    --green: #1b7f4b;
+    --green-bg: #e6f4ec;
+    --amber: #9a6700;
+    --amber-bg: #fff4d6;
+    --red: #b3261e;
+    --red-bg: #fbe9e7;
+    --grey: #4a5560;
+    --grey-bg: #eceff2;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.45;
+  }
+  header { background: var(--accent); color: #fff; padding: 28px 16px; }
+  header .wrap, main, footer { max-width: 640px; margin: 0 auto; }
+  header h1 { margin: 0 0 4px; font-size: 26px; }
+  header p { margin: 0; color: #c9d6e3; font-size: 15px; }
+  main { padding: 24px 16px 8px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  label { font-weight: 600; display: block; margin-bottom: 8px; }
+  .row { display: flex; gap: 8px; }
+  input[type=text] {
+    flex: 1;
+    min-width: 0;
+    padding: 11px 12px;
+    font-size: 16px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-family: inherit;
+  }
+  input[type=text]:focus { outline: 2px solid var(--accent); border-color: transparent; }
+  button.primary {
+    background: var(--accent);
+    color: #fff;
+    border: 0;
+    border-radius: 8px;
+    padding: 0 20px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button.primary:disabled { opacity: .6; cursor: default; }
+  .examples { margin-top: 12px; font-size: 14px; color: var(--muted); }
+  .examples button {
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 3px 10px;
+    margin-left: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--text);
+  }
+  .examples button:hover { background: var(--grey-bg); }
+  #result { display: none; }
+  .status { padding: 14px 16px; border-radius: 8px; margin-bottom: 16px; }
+  .status strong { display: block; font-size: 22px; }
+  .status span { font-size: 14px; }
+  .genuine { background: var(--green-bg); color: var(--green); }
+  .expired { background: var(--amber-bg); color: var(--amber); }
+  .recalled { background: var(--red-bg); color: var(--red); }
+  .notfound { background: var(--grey-bg); color: var(--grey); }
+  dl { margin: 0; display: grid; grid-template-columns: 140px 1fr; gap: 8px 12px; font-size: 15px; }
+  dt { color: var(--muted); }
+  dd { margin: 0; word-break: break-word; }
+  .mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; }
+  .error { color: var(--red); }
+  footer { padding: 8px 16px 32px; font-size: 13px; color: var(--muted); }
+  footer a { color: var(--accent); }
+  @media (max-width: 480px) {
+    dl { grid-template-columns: 1fr; gap: 2px; }
+    dd { margin-bottom: 8px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Medicine Verifier</h1>
+    <p>Check a medicine batch against the public registry on Ethereum Sepolia. No wallet needed.</p>
+  </div>
+</header>
+
+<main>
+  <div class="card">
+    <label for="batch">Batch ID printed on the pack</label>
+    <div class="row">
+      <input type="text" id="batch" placeholder="e.g. PARA-2026-001" autocomplete="off" spellcheck="false">
+      <button class="primary" id="go">Verify</button>
+    </div>
+    <div class="examples">
+      Try:
+      <button type="button" data-id="PARA-2026-001">PARA-2026-001</button>
+      <button type="button" data-id="FAKE-999">FAKE-999</button>
+    </div>
+  </div>
+
+  <div class="card" id="result">
+    <div class="status" id="status"></div>
+    <dl id="details"></dl>
+  </div>
+</main>
+
+<footer>
+  Contract
+  <a class="mono" id="contractLink" target="_blank" rel="noopener"></a><br>
+  Reading is free: the page only calls the contract's read-only <span class="mono">verifyBatch</span> function.
+</footer>
+
+<script src="ethers.umd.min.js"></script>
+<script>
+  const CONTRACT = "0xe16Af03E9a14705198afBE17db4DD126B86B627c";
+  const RPC_URLS = [
+    "https://ethereum-sepolia-rpc.publicnode.com",
+    "https://rpc.sepolia.org",
+    "https://sepolia.drpc.org"
+  ];
+  const ABI = [
+    "function verifyBatch(string batchId) view returns (uint8 status, tuple(address manufacturer, string drugName, uint64 expiryDate, uint64 registeredAt, bool recalled, string recallReason) batch, string manufacturerLabel)"
+  ];
+
+  const STATUS = [
+    { name: "Not found", css: "notfound", note: "This batch ID is not in the registry. Treat the medicine as suspicious." },
+    { name: "Genuine", css: "genuine", note: "Registered by an approved manufacturer, not expired and not recalled." },
+    { name: "Expired", css: "expired", note: "Registered, but it is past its expiry date. Do not use." },
+    { name: "Recalled", css: "recalled", note: "A regulator has withdrawn this batch. Do not use." }
+  ];
+
+  const $ = (id) => document.getElementById(id);
+  const fmt = (ts) => new Date(Number(ts) * 1000).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+
+  $("contractLink").textContent = CONTRACT;
+  $("contractLink").href = "https://sepolia.etherscan.io/address/" + CONTRACT;
+
+  async function callRegistry(batchId) {
+    let lastError;
+    for (const url of RPC_URLS) {
+      try {
+        const provider = new ethers.JsonRpcProvider(url, 11155111, { staticNetwork: true });
+        const contract = new ethers.Contract(CONTRACT, ABI, provider);
+        return await contract.verifyBatch(batchId);
+      } catch (err) {
+        lastError = err;
+      }
+    }
+    throw lastError;
+  }
+
+  function row(label, value, mono) {
+    const dt = document.createElement("dt");
+    dt.textContent = label;
+    const dd = document.createElement("dd");
+    dd.textContent = value;
+    if (mono) dd.className = "mono";
+    return [dt, dd];
+  }
+
+  function show(css, title, note, rows) {
+    const box = $("status");
+    box.className = "status " + css;
+    box.innerHTML = "";
+    const strong = document.createElement("strong");
+    strong.textContent = title;
+    const span = document.createElement("span");
+    span.textContent = note;
+    box.append(strong, span);
+
+    const dl = $("details");
+    dl.innerHTML = "";
+    rows.forEach(([l, v, m]) => dl.append(...row(l, v, m)));
+    $("result").style.display = "block";
+  }
+
+  async function verify() {
+    const id = $("batch").value.trim();
+    if (!id) { $("batch").focus(); return; }
+    $("go").disabled = true;
+    $("go").textContent = "Checking";
+    try {
+      const [status, batch, label] = await callRegistry(id);
+      const s = STATUS[Number(status)];
+      const rows = [["Batch ID", id]];
+      if (Number(status) !== 0) {
+        rows.push(
+          ["Medicine", batch.drugName],
+          ["Manufacturer", label || "Unknown"],
+          ["Manufacturer address", batch.manufacturer, true],
+          ["Registered on", fmt(batch.registeredAt)],
+          ["Expiry date", fmt(batch.expiryDate)]
+        );
+        if (batch.recalled) rows.push(["Recall reason", batch.recallReason]);
+      }
+      show(s.css, s.name, s.note, rows);
+      history.replaceState(null, "", "?batch=" + encodeURIComponent(id));
+    } catch (err) {
+      show("notfound", "Could not reach the network", "Check your internet connection and try again.", [["Details", String(err.shortMessage || err.message || err)]]);
+      $("details").classList.add("error");
+    } finally {
+      $("go").disabled = false;
+      $("go").textContent = "Verify";
+    }
+  }
+
+  $("go").addEventListener("click", verify);
+  $("batch").addEventListener("keydown", (e) => { if (e.key === "Enter") verify(); });
+  document.querySelectorAll(".examples button").forEach((b) =>
+    b.addEventListener("click", () => { $("batch").value = b.dataset.id; verify(); })
+  );
+
+  const preset = new URLSearchParams(location.search).get("batch");
+  if (preset) { $("batch").value = preset; verify(); }
+</script>
+</body>
+</html>
