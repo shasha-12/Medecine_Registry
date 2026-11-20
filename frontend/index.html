@@ -279,6 +279,8 @@ const __$G=typeof globalThis!=="undefined"?globalThis:typeof window!=="undefined
       return false;
     }
     try {
+      // always show the account picker, so the chosen account is the one the page uses
+      await window.ethereum.request({ method: "wallet_requestPermissions", params: [{ eth_accounts: {} }] });
       await window.ethereum.request({ method: "eth_requestAccounts" });
       try {
         await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: SEPOLIA_HEX }] });
@@ -289,7 +291,7 @@ const __$G=typeof globalThis!=="undefined"?globalThis:typeof window!=="undefined
       const provider = new ethers.BrowserProvider(window.ethereum);
       signer = await provider.getSigner();
       $("walletInfo").textContent = "Connected: " + short(await signer.getAddress());
-      $("connect").textContent = "Connected";
+      $("connect").textContent = "Switch account";
       return true;
     } catch (err) {
       message($("regMsg"), "bad", "Wallet connection was cancelled.");
@@ -345,6 +347,21 @@ const __$G=typeof globalThis!=="undefined"?globalThis:typeof window!=="undefined
     } finally {
       $("register").disabled = false;
     }
+  }
+
+  // follow account changes made inside the wallet
+  if (window.ethereum) {
+    window.ethereum.on("accountsChanged", async (accounts) => {
+      if (!accounts.length) {
+        signer = null;
+        $("walletInfo").textContent = "Wallet not connected";
+        $("connect").textContent = "Connect wallet";
+        return;
+      }
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      signer = await provider.getSigner();
+      $("walletInfo").textContent = "Connected: " + short(await signer.getAddress());
+    });
   }
 
   $("connect").addEventListener("click", connect);
