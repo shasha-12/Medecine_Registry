@@ -23,4 +23,4 @@ npx hardhat test     # 22 passing
 Sepolia contract address: `0xe16Af03E9a14705198afBE17db4DD126B86B627c`
 
 ## Bonus: verification page
-`frontend/index.html` is a small read-only page for the demo. Open it in a browser (double-click the file), type a batch ID and it calls `verifyBatch` on the Sepolia contract. No wallet or install needed. It also accepts a link such as `index.html?batch=PARA-2026-001`, which is how a QR code on a pack could open it.
+`frontend/index.html` is a small read-only page for the demo. Open it in a browser (double-click the file), type a batch ID and it calls `verifyBatch` on the Sepolia contract. No wallet or install needed; the ethers library is embedded in the file. It also accepts a link such as `index.html?batch=PARA-2026-001`, which is how a QR code on a pack could open it.
