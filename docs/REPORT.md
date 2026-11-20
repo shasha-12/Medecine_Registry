@@ -328,7 +328,13 @@ The contract was deployed to the **Ethereum Sepolia testnet** using Remix with M
 
 **Bonus: demo page.** To make the project easy to demonstrate, a small web page (`frontend/index.html`) lets a manufacturer register a batch, anyone check it, and a regulator recall it, all against the deployed Sepolia contract. Checking is a read-only call, so it is free and needs no wallet. Registering and recalling use MetaMask, and the contract's role checks still apply: a wallet that is not a regulator is refused when it tries to recall.
 
-![Figure 11: Demo page showing a recalled batch and the recall confirmation](screenshots/demo-page.png)
+![Figure 11: Demo page, a manufacturer registers batch AMOX-2026-001](screenshots/demo-1-register.png)
+
+![Figure 12: Demo page, checking the batch returns Genuine](screenshots/demo-2-genuine.png)
+
+![Figure 13: Demo page, a regulator recalls the batch](screenshots/demo-3-recall.png)
+
+![Figure 14: Demo page, checking the same batch now returns Recalled with the reason](screenshots/demo-4-recalled.png)
 
 # 6. Validation and Testing
 
