@@ -21,6 +21,8 @@ npx hardhat test     # 22 passing
 
 Sepolia contract address: `0xe16Af03E9a14705198afBE17db4DD126B86B627c`
 
+Oral presentation video: https://drive.google.com/file/d/1tjvqFOHKrak904xWQ6fdfBvVSCXmbM5A/view?usp=sharing
+
 ## Bonus: demo page
 `frontend/index.html` is a small page that shows the whole idea in three steps.
 1. **Register a batch** (approved manufacturer, needs MetaMask on Sepolia).

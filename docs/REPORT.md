@@ -353,5 +353,13 @@ The full table of expected versus actual results is in *Test Cases* (`docs/TEST_
 # 8. Conclusion
 MedicineRegistry gives patients and pharmacists a free, tamper-proof way to check that a medicine batch is genuine. It demonstrates role-based access control, a verifiable audit trail, thorough input validation and a complete test suite, and it was deployed and exercised on the Ethereum Sepolia testnet. It directly supports the mission of replacing blind trust with verifiable transparency in healthcare.
 
-# Appendix: Project files
+# Appendix: Project files and links
 `contracts/MedicineRegistry.sol`, `remix/MedicineRegistry.sol`, `test/MedicineRegistry.test.js`, `scripts/deploy.js`, `scripts/interact.js`, `docs/DEPLOYMENT_GUIDE.md`, `docs/TEST_CASES.md`, `docs/test-output.txt`.
+
+**Links**
+
+| Item | Link |
+|---|---|
+| Oral presentation video | https://drive.google.com/file/d/1tjvqFOHKrak904xWQ6fdfBvVSCXmbM5A/view?usp=sharing |
+| Contract on Sepolia Etherscan | https://sepolia.etherscan.io/address/0xe16Af03E9a14705198afBE17db4DD126B86B627c |
+
