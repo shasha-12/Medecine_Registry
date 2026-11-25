@@ -12,7 +12,6 @@ Author: Anitha Uwimpuhwe · Blockchain and Applications · Summative Assessment
 | Deployment guide | `docs/DEPLOYMENT_GUIDE.md` |
 | Test cases | `docs/TEST_CASES.md`, `test/MedicineRegistry.test.js`, `docs/test-output.txt` |
 | Presentation | `docs/Presentation.pptx` |
-| Oral prep | `docs/ORAL_QA.md`, `docs/ORAL_SCRIPT.md` (video guide) |
 
 ## Quick start
 ```bash
