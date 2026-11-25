@@ -7,7 +7,7 @@ Author: Anitha Uwimpuhwe · Blockchain and Applications · Summative Assessment
 ## Deliverables
 | Deliverable | File |
 |---|---|
-| Project report | `docs/Project_Report.docx` (source: `docs/REPORT.md`) |
+| Project report | `docs/Project_Report.pdf` and `docs/Project_Report.docx` (source: `docs/REPORT.md`) |
 | Smart contract | `contracts/MedicineRegistry.sol` (Remix copy: `remix/MedicineRegistry.sol`) |
 | Deployment guide | `docs/DEPLOYMENT_GUIDE.md` |
 | Test cases | `docs/TEST_CASES.md`, `test/MedicineRegistry.test.js`, `docs/test-output.txt` |
