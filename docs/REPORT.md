@@ -361,5 +361,6 @@ MedicineRegistry gives patients and pharmacists a free, tamper-proof way to chec
 | Item | Link |
 |---|---|
 | Oral presentation video | https://drive.google.com/file/d/1tjvqFOHKrak904xWQ6fdfBvVSCXmbM5A/view?usp=sharing |
+| Source code on GitHub | https://github.com/shasha-12/Medecine_Registry |
 | Contract on Sepolia Etherscan | https://sepolia.etherscan.io/address/0xe16Af03E9a14705198afBE17db4DD126B86B627c |
 
